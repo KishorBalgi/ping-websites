@@ -1,11 +1,9 @@
 const https = require("https");
 const http = require("http");
-const fs = require("fs");
-const path = require("path");
+const cron = require("node-cron");
 require("dotenv").config();
 
 // HTTP server:
-
 const server = http.createServer();
 
 const websitesToPing = process.env.SITES.split(",");
@@ -27,14 +25,16 @@ function pingWebsite() {
   );
 }
 
+// Cron job to ping the website every 10 minutes
+cron.schedule("*/10 * * * *", () => {
+  console.log(`Server is running. Pinging every 10 minutes...`);
+  pingWebsite();
+});
+
 // Home route:
 server.on("request", (req, res) => {
   res.writeHead(200, { "Content-Type": "text/html" });
   res.end("<h1>Server is running. Pinging every 10 minutes...</h1>");
 });
 
-server.listen(3000, () => {
-  const interval = 10 * 60 * 1000;
-  setInterval(pingWebsite, interval);
-  console.log(`Server is running. Pinging every 10 minutes...`);
-});
+server.listen(3000);
